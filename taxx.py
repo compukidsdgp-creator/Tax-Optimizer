@@ -12,7 +12,7 @@ st.set_page_config(page_title="DNA Tax Optimizer", layout="wide")
 # -----------------------------
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image("logo.png", width=250)
+    st.image("logo.png", width=250, use_container_width=True)
 with col2:
     st.title("DNA Tax Optimizer")
     st.caption("AI-Powered Tax Planning & Optimization Dashboard")
