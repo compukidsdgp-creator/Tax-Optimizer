@@ -12,7 +12,7 @@ st.set_page_config(page_title="DNA Tax Optimizer", layout="wide")
 # -----------------------------
 col1, col2 = st.columns([1, 4])
 with col1:
-    st.image("logo.png", width=120)
+    st.image("logo.png", width=180)
 with col2:
     st.title("DNA Tax Optimizer")
     st.caption("AI-Powered Tax Planning & Optimization Dashboard")
@@ -20,7 +20,7 @@ with col2:
 # -----------------------------
 # SIDEBAR
 # -----------------------------
-st.sidebar.image("logo.png", width=150)
+st.sidebar.image("logo.png", width=180)
 #client_name = st.sidebar.text_input("Client Name")
 financial_year = st.sidebar.selectbox("Financial Year", ["2024-25", "2025-26"])
 
@@ -29,8 +29,8 @@ chart_type = st.sidebar.selectbox(
     ["None", "Income Breakdown", "Deductions Breakdown", "Tax Breakdown"]
 )
 
-extra_super = st.sidebar.slider("Extra Super (Simulation)", 0, 20000, 0)
-extra_donation = st.sidebar.slider("Extra Donation (Simulation)", 0, 5000, 0)
+#extra_super = st.sidebar.slider("Extra Super (Simulation)", 0, 20000, 0)
+#extra_donation = st.sidebar.slider("Extra Donation (Simulation)", 0, 5000, 0)
 
 # -----------------------------
 # INCOME
