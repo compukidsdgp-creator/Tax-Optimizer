@@ -192,7 +192,7 @@ elif chart_type == "Tax Breakdown":
 # -----------------------------
 # ADVANCED STRATEGY OPTIMIZER
 # -----------------------------
-st.header("🧠 Advanced Strategy Optimizer")
+st.header("Advanced Strategy Optimizer")
 
 def tax_after_adjustment(new_income):
     new_tax = calculate_tax(new_income)
@@ -242,7 +242,7 @@ if net_rental >= 0:
     st.write(f"Rental Strategy → ${res['amount']} → Save ${round(res['saving'],2)}")
 
 # RANKING
-st.subheader("🏆 Best Strategies")
+st.subheader("Best Strategies")
 for name, data in sorted(strategies, key=lambda x: x[1]["saving"], reverse=True):
     st.write(f"{name} → Save ${round(data['saving'],2)}")
 
