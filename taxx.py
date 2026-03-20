@@ -26,7 +26,7 @@ model = genai.GenerativeModel("gemini-2.5-flash")
 col1, col2 = st.columns([2, 5])
 
 with col1:
-    st.image(r"C:\Users\User\Desktop\app\logo.png", width=250, use_container_width=True)
+    st.image("logo.png", width=250, use_container_width=True)
 
 with col2:
     st.title("DNA Tax Optimizer")
@@ -35,7 +35,7 @@ with col2:
 # -----------------------------
 # SIDEBAR
 # -----------------------------
-st.sidebar.image(r"C:\Users\User\Desktop\app\logo.png", width=250)
+st.sidebar.image("logo.png", width=250)
 
 #client_name = st.sidebar.text_input("Client Name")
 financial_year = st.sidebar.selectbox("Financial Year", ["2024-25", "2025-26"])
@@ -328,7 +328,7 @@ def generate_pdf():
     # -----------------------------
     # HEADER
     # -----------------------------
-    content.append(Image(r"C:\Users\User\Desktop\app\logo.png", width=120, height=60))
+    content.append(Image("logo.png", width=120, height=60))
     content.append(Paragraph("DNA Tax Advisory Report", styles["Title"]))
     content.append(Spacer(1, 10))
 
