@@ -275,9 +275,9 @@ if st.button("Generate AI Advice"):
     Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. Advise how can the current tax liability can be reduced by giving examples.
     Also at the end suggest to feel free to talk to DNA team and to get consultation ideas mentining our website DNAca.com.au and phone number 02-90644400.
     
-    key note: put thi oone ...Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
+    key note: put this one ...Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
 
-Visit our website: DNAca.com.au Or call us on: 02-90644400 first and followed by the advice
+   Visit our website: dnaca.com.au Or call us on: 02-90644400 first and followed by the advice
     """
 
     with st.spinner("💡 Finalizing expert recommendations..."):
@@ -425,13 +425,18 @@ def generate_pdf():
 
     try:
         prompt = f"""
-        Client Income: {total_income}
-        Taxable Income: {taxable_income}
-        Net Tax: {net_tax}
-        Rental: {net_rental}
+    Client Income: {total_income}
+    Taxable Income: {taxable_income}
+    Net Tax: {net_tax}
+    Rental: {net_rental}
 
-        Provide concise professional tax advice.
-        """
+    Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. Advise how can the current tax liability can be reduced by giving examples.
+    Also at the end suggest to feel free to talk to DNA team and to get consultation ideas mentining our website DNAca.com.au and phone number 02-90644400.
+    
+    key note: put thi oone ...Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
+
+    Visit our website: dnaca.com.au Or call us on: 02-90644400 first and followed by the advice
+    """
 
         response = model.generate_content(prompt)
         advice_text = response.text
