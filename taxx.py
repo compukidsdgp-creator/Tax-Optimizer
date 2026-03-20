@@ -1,26 +1,42 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import google.generativeai as genai
 
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, PageBreak, Table, TableStyle
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.charts.piecharts import Pie
+from reportlab.graphics.charts.barcharts import VerticalBarChart
 
+# -----------------------------
+# CONFIG
+# -----------------------------
 st.set_page_config(page_title="DNA Tax Optimizer", layout="wide")
+
+# 🔑 SET YOUR GEMINI API KEY
+genai.configure(api_key="AIzaSyA5a698ZqSTdG2_G3SGqJq4_nz2ZDpP8F0")
+
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # -----------------------------
 # HEADER
 # -----------------------------
-col1, col2 = st.columns([1, 4])
+col1, col2 = st.columns([2, 5])
+
 with col1:
-    st.image("logo.png", width=250, use_container_width=True)
+    st.image(r"C:\Users\User\Desktop\app\logo.png", width=250, use_container_width=True)
+
 with col2:
     st.title("DNA Tax Optimizer")
-    st.caption("AI-Powered Tax Planning & Optimization Dashboard")
+    st.caption("DNA AI-Powered Tax Planning & Advisory Dashboard")
 
 # -----------------------------
 # SIDEBAR
 # -----------------------------
-st.sidebar.image("logo.png", width=250)
+st.sidebar.image(r"C:\Users\User\Desktop\app\logo.png", width=250)
+
 #client_name = st.sidebar.text_input("Client Name")
 financial_year = st.sidebar.selectbox("Financial Year", ["2024-25", "2025-26"])
 
@@ -28,9 +44,6 @@ chart_type = st.sidebar.selectbox(
     "Select Chart",
     ["None", "Income Breakdown", "Deductions Breakdown", "Tax Breakdown"]
 )
-
-#extra_super = st.sidebar.slider("Extra Super (Simulation)", 0, 20000, 0)
-#extra_donation = st.sidebar.slider("Extra Donation (Simulation)", 0, 5000, 0)
 
 # -----------------------------
 # INCOME
@@ -111,6 +124,7 @@ tax = calculate_tax(taxable_income)
 has_private = st.selectbox("Private Health Cover?", ["Yes", "No"])
 medicare = taxable_income * 0.02
 surcharge = 0
+
 if has_private == "No" and taxable_income > 90000:
     surcharge = taxable_income * 0.01
 
@@ -133,11 +147,18 @@ lito_offset = lito(taxable_income)
 franking_credit = franked_dividend * 0.3
 total_offset = lito_offset + franking_credit
 
+
 # -----------------------------
 # FINAL TAX
 # -----------------------------
 gross_tax = tax + total_medicare
-net_tax = gross_tax - total_offset
+non_refundable_offset = lito_offset
+refundable_offset = franking_credit
+
+net_tax = max(0, gross_tax - non_refundable_offset)
+
+# Refund comes from refundable credits
+
 
 # -----------------------------
 # PAYG
@@ -145,7 +166,7 @@ net_tax = gross_tax - total_offset
 payg = st.slider("PAYG Withheld", 0, 50000, 10000)
 instalments = st.slider("Instalments", 0, 50000, 2000)
 
-final_position = payg + instalments - net_tax
+final_position = payg + instalments + refundable_offset - net_tax
 
 # -----------------------------
 # METRICS
@@ -158,6 +179,9 @@ col3.metric("Net Tax", f"${round(net_tax,2)}")
 # -----------------------------
 # RESULT
 # -----------------------------
+if net_tax == 0:
+    st.success("Tax Liability: $0")
+
 if final_position > 0:
     st.success(f"Refund: ${round(final_position,2)}")
 else:
@@ -166,7 +190,7 @@ else:
 # -----------------------------
 # CHARTS
 # -----------------------------
-st.header("📈 Dashboard")
+st.header("📈 DNA Dashboard")
 
 if chart_type == "Income Breakdown":
     df = pd.DataFrame({
@@ -190,97 +214,253 @@ elif chart_type == "Tax Breakdown":
     st.plotly_chart(px.bar(df, x="Category", y="Amount"))
 
 # -----------------------------
-# ADVANCED STRATEGY OPTIMIZER
+# STRATEGY OPTIMIZER
 # -----------------------------
-st.header("Advanced Strategy Optimizer")
+st.header("DNA Strategy Optimizer")
 
 def tax_after_adjustment(new_income):
-    new_tax = calculate_tax(new_income)
-    new_medicare = new_income * 0.02
-    return new_tax + new_medicare - total_offset
+    return calculate_tax(new_income) + new_income*0.02 - total_offset
 
-
-def optimize_strategy(max_amount, step):
-    best = {"amount": 0, "saving": 0, "efficiency": 0}
-
-    for amt in range(step, max_amount + step, step):
-        new_income = taxable_income - amt
-        new_tax = tax_after_adjustment(new_income)
-        saving = net_tax - new_tax
-
-        efficiency = saving / amt if amt else 0
-
-        if saving > best["saving"]:
-            best = {"amount": amt, "saving": saving, "efficiency": efficiency}
-
+def optimize(max_amt, step):
+    best = (0,0)
+    for amt in range(step, max_amt+step, step):
+        saving = net_tax - tax_after_adjustment(taxable_income - amt)
+        if saving > best[1]:
+            best = (amt, saving)
     return best
-
 
 strategies = []
 
-# SUPER
-remaining_super = max(0, 27500 - super_contribution)
-if remaining_super > 0:
-    res = optimize_strategy(min(remaining_super, 20000), 1000)
-    strategies.append(("Super", res))
-    st.write(f"Super → Add ${res['amount']} → Save ${round(res['saving'],2)}")
+super_amt, super_save = optimize(5000,1000)
+strategies.append(("Super",super_save))
+st.write(f"Super: Add ${super_amt} → Save ${round(super_save,2)}")
 
-# DONATION
-res = optimize_strategy(5000, 500)
-strategies.append(("Donation", res))
-st.write(f"Donation → ${res['amount']} → Save ${round(res['saving'],2)}")
+don_amt, don_save = optimize(5000,500)
+strategies.append(("Donation",don_save))
+st.write(f"Donation: ${don_amt} → Save ${round(don_save,2)}")
 
-# WORK
-res = optimize_strategy(8000, 500)
-strategies.append(("Work", res))
-st.write(f"Work Expenses → ${res['amount']} → Save ${round(res['saving'],2)}")
+# -----------------------------
+# AI TAX ADVISOR
+# -----------------------------
+st.header("DNA driven AI Tax Advisor")
 
-# RENTAL
-if net_rental >= 0:
-    res = optimize_strategy(10000, 1000)
-    strategies.append(("Negative Gearing", res))
-    st.write(f"Rental Strategy → ${res['amount']} → Save ${round(res['saving'],2)}")
+if st.button("Generate AI Advice"):
 
-# RANKING
-st.subheader("Best Strategies")
-for name, data in sorted(strategies, key=lambda x: x[1]["saving"], reverse=True):
-    st.write(f"{name} → Save ${round(data['saving'],2)}")
+    progress_bar = st.progress(0)
+    status_text = st.empty()
 
-# COMBINED
-total_opt = sum([s[1]["amount"] for s in strategies])
-combined_income = taxable_income - total_opt
-combined_tax = tax_after_adjustment(combined_income)
-combined_saving = net_tax - combined_tax
+    # Step 1
+    status_text.text("🔍 Analyzing income structure...")
+    progress_bar.progress(20)
 
-st.success(f"Combined Strategy → Save ${round(combined_saving,2)}")
+    # Step 2
+    status_text.text("📊 Evaluating tax position...")
+    progress_bar.progress(40)
+
+    # Step 3
+    status_text.text("🏠 Reviewing rental & deductions...")
+    progress_bar.progress(60)
+
+    # Step 4
+    status_text.text("🧠 Generating AI insights...")
+    progress_bar.progress(80)
+
+    # FINAL AI CALL
+    prompt = f"""
+    Client Income: {total_income}
+    Taxable Income: {taxable_income}
+    Net Tax: {net_tax}
+    Rental: {net_rental}
+
+    Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. Advise how can the current tax liability can be reduced by giving examples.
+    Also at the end suggest to feel free to talk to DNA team and to get consultation ideas mentining our website DNAca.com.au and phone number 02-90644400.
+    
+    key note: put thi oone ...Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
+
+Visit our website: DNAca.com.au Or call us on: 02-90644400 first and followed by the advice
+    """
+
+    with st.spinner("💡 Finalizing expert recommendations..."):
+        response = model.generate_content(prompt)
+        advice = response.text
+
+    progress_bar.progress(100)
+    status_text.text("✅ Analysis Complete")
+
+    st.success("AI Advice Ready:")
+    st.write(advice)
+
+# -----------------------------
+# CHATBOT
+# -----------------------------
+#st.header("💬 AI Chatbot")
+
+#if "chat" not in st.session_state:
+    #st.session_state.chat = []
+
+#for msg in st.session_state.chat:
+    #st.chat_message(msg["role"]).write(msg["content"])
+
+#user_input = st.chat_input("Ask tax question...")
+
+#if user_input:
+    #st.session_state.chat.append({"role":"user","content":user_input})
+
+    #context = f"Income:{total_income}, Tax:{net_tax}, Rental:{net_rental}"
+
+    #reply = model.generate_content(context + user_input).text
+
+   # st.session_state.chat.append({"role":"assistant","content":reply})
+
+   # st.chat_message("assistant").write(reply)
 
 # -----------------------------
 # PDF
 # -----------------------------
+
 def generate_pdf():
     file_path = "tax_report.pdf"
     doc = SimpleDocTemplate(file_path)
     styles = getSampleStyleSheet()
 
     content = []
-    content.append(Image("logo.png", width=100, height=50))
-    content.append(Paragraph("DNA Tax Report", styles["Title"]))
-    content.append(Spacer(1,12))
+
+    # -----------------------------
+    # HEADER
+    # -----------------------------
+    content.append(Image(r"C:\Users\User\Desktop\app\logo.png", width=120, height=60))
+    content.append(Paragraph("DNA Tax Advisory Report", styles["Title"]))
+    content.append(Spacer(1, 10))
 
     #content.append(Paragraph(f"Client: {client_name}", styles["Normal"]))
+    content.append(Paragraph(f"Financial Year: {financial_year}", styles["Normal"]))
+    content.append(Spacer(1, 15))
+
+    # -----------------------------
+    # INCOME TABLE
+    # -----------------------------
+    content.append(Paragraph("Income Summary", styles["Heading2"]))
+
+    income_data = [
+        ["Category", "Amount"],
+        ["Salary", salary],
+        ["Allowance", allowance],
+        ["Interest", interest],
+        ["Dividend", dividend],
+        ["Franked Dividend", franked_dividend],
+        ["Capital Gain", capital_gain],
+        ["Rental", net_rental],
+        ["Other", other_income],
+    ]
+
+    table = Table(income_data)
+    table.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.grey),
+        ("GRID", (0,0), (-1,-1), 1, colors.black)
+    ]))
+
+    content.append(table)
+    content.append(Spacer(1, 20))
+
+    # -----------------------------
+    # EXPENSE TABLE
+    # -----------------------------
+    content.append(Paragraph("Deductions Summary", styles["Heading2"]))
+
+    expense_data = [
+        ["Category", "Amount"],
+        ["Car", car],
+        ["Travel", travel],
+        ["Education", education],
+        ["Work", other_work],
+        ["Donations", donations],
+        ["Tax Agent", tax_agent],
+        ["Super", super_contribution],
+        ["Other", other_deduction],
+    ]
+
+    table2 = Table(expense_data)
+    table2.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.grey),
+        ("GRID", (0,0), (-1,-1), 1, colors.black)
+    ]))
+
+    content.append(table2)
+    content.append(Spacer(1, 20))
+
+    # -----------------------------
+    # CHART (INCOME)
+    # -----------------------------
+    content.append(Paragraph("Income Visualization", styles["Heading2"]))
+
+    drawing = Drawing(400, 200)
+    chart = VerticalBarChart()
+    chart.x = 50
+    chart.y = 50
+    chart.height = 125
+    chart.width = 300
+
+    chart.data = [[salary, allowance, interest, dividend, net_rental]]
+    chart.categoryAxis.categoryNames = ["Salary","Allow","Interest","Div","Rental"]
+
+    drawing.add(chart)
+    content.append(drawing)
+    content.append(Spacer(1, 20))
+
+    # -----------------------------
+    # TAX SUMMARY
+    # -----------------------------
+    content.append(Paragraph("Tax Position", styles["Heading2"]))
+
+    content.append(Paragraph(f"Total Income: ${total_income}", styles["Normal"]))
+    content.append(Paragraph(f"Total Deductions: ${total_deductions}", styles["Normal"]))
     content.append(Paragraph(f"Taxable Income: ${taxable_income}", styles["Normal"]))
-    content.append(Paragraph(f"Net Tax: ${round(net_tax,2)}", styles["Normal"]))
+    content.append(Paragraph(f"Tax Payable: ${round(net_tax,2)}", styles["Normal"]))
+    content.append(Spacer(1, 20))
 
+    # -----------------------------
+    # AI ADVICE
+    # -----------------------------
+    content.append(Paragraph("Professional Tax Advice", styles["Heading2"]))
+
+    try:
+        prompt = f"""
+        Client Income: {total_income}
+        Taxable Income: {taxable_income}
+        Net Tax: {net_tax}
+        Rental: {net_rental}
+
+        Provide concise professional tax advice.
+        """
+
+        response = model.generate_content(prompt)
+        advice_text = response.text
+
+    except:
+        advice_text = "AI advice unavailable. Please review manually."
+
+    content.append(Paragraph(advice_text, styles["Normal"]))
+
+    # -----------------------------
+    # DISCLAIMER
+    # -----------------------------
+    content.append(Spacer(1, 20))
+    content.append(Paragraph(
+        "Disclaimer: This report is generated for advisory purposes only. "
+        "Please consult a registered tax agent for final decisions.",
+        styles["Italic"]
+    ))
+
+    # BUILD PDF
     doc.build(content)
-    return file_path
 
+    return file_path
 st.header("📄 Export Report")
 
 if st.button("Generate PDF"):
     pdf = generate_pdf()
     with open(pdf, "rb") as f:
         st.download_button("Download PDF", f, file_name="Tax_Report.pdf")
-
 # -----------------------------
 # FOOTER
 # -----------------------------
