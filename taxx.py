@@ -16,7 +16,7 @@ from reportlab.graphics.charts.barcharts import VerticalBarChart
 st.set_page_config(page_title="DNA Tax Optimizer", layout="wide")
 
 # 🔑 SET YOUR GEMINI API KEY
-genai.configure(api_key="AIzaSyA5a698ZqSTdG2_G3SGqJq4_nz2ZDpP8F0")
+genai.configure(api_key="AIzaSyDQ7HSkSUTwg5d3KJcje5_HS775AhEO_ZY")
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
