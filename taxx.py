@@ -10,35 +10,6 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 
-hide_streamlit_ui = """
-<style>
-/* Hide hamburger / 3 dots menu */
-#MainMenu {visibility: hidden;}
-
-/* Hide header بالكامل */
-header {visibility: hidden;}
-
-/* Hide footer */
-footer {visibility: hidden;}
-
-/* 🔥 Hide top-right creator / running icon */
-[data-testid="stToolbar"] {
-    display: none !important;
-}
-
-/* Hide deploy button / cloud stuff */
-[data-testid="stDecoration"] {
-    display: none !important;
-}
-
-/* Extra aggressive (future-proofing) */
-button[kind="header"] {
-    display: none !important;
-}
-</style>
-"""
-
-st.markdown(hide_streamlit_ui, unsafe_allow_html=True)
 
 
 
