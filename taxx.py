@@ -10,16 +10,17 @@ from reportlab.graphics.shapes import Drawing
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 
-hide_streamlit_style = """
+hide_all = """
     <style>
+    #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
 """
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-# -----------------------------
-# CONFIG
-# -----------------------------
-st.set_page_config(page_title="DNA Tax Optimizer", layout="wide")
+st.markdown(hide_all, unsafe_allow_html=True)
+
+
+
 
 # 🔑 SET YOUR GEMINI API KEY
 genai.configure(api_key="AIzaSyAU3HNcdLH-TJ963xhdkHlMLB7dTxxQ3Yc")
