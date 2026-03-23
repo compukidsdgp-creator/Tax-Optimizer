@@ -15,7 +15,7 @@ from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 
 # 🔑 SET YOUR GEMINI API KEY
-genai.configure(api_key="AIzaSyCax3uUMWp9n1jwTeBlJuPJXaULmcRqpgo")
+genai.configure(api_key="AIzaSyAuchvbDpnUASD2hxXEdPtrPVH27sw5YdQ")
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
