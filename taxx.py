@@ -472,6 +472,32 @@ Call us on: 02-90644400
 
 except Exception as e:
     content.append(Paragraph("AI advice unavailable. Please review manually.", styles["Normal"]))
+
+
+    # -----------------------------
+    # DISCLAIMER
+    # -----------------------------
+    content.append(Spacer(1, 20))
+    content.append(Paragraph(
+        "Disclaimer: This report is generated for advisory purposes only. "
+        "Please consult a registered tax agent for final decisions.",
+        styles["Italic"]
+    ))
+
+    # BUILD PDF
+    doc.build(content)
+
+    return file_path
+st.header("📄 Export Report")
+
+if st.button("Generate PDF"):
+    pdf = generate_pdf()
+    with open(pdf, "rb") as f:
+        st.download_button("Download PDF", f, file_name="Tax_Report.pdf")
+
+# -----------------------------
+# FOOTER
 # -----------------------------
 st.markdown("---")
 st.markdown("© 2026 DNA | AI Tax Solutions")
+
