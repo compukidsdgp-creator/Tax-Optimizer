@@ -439,7 +439,7 @@ def generate_pdf():
         paragraphs = text.split("\n\n")  # split by double line breaks
         return [p.strip() for p in paragraphs if p.strip()]
 
-       try:
+        try:
           prompt = f"""
           Client Income: {total_income}
           Taxable Income: {taxable_income}
@@ -470,7 +470,7 @@ def generate_pdf():
             content.append(Paragraph(para, ai_style))
             content.append(Spacer(1, 8))
 
-    except Exception as e:
+      except Exception as e:
         content.append(Paragraph("AI advice unavailable. Please review manually.", styles["Normal"]))
 
 
