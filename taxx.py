@@ -418,55 +418,60 @@ def generate_pdf():
     content.append(Spacer(1, 20))
 
     # -----------------------------
-    # AI ADVICE
-    # -----------------------------
-    content.append(Paragraph("Professional Tax Advice", styles["Heading2"]))
-
-    try:
-        prompt = f"""
-    Client Income: {total_income}
-    Taxable Income: {taxable_income}
-    Net Tax: {net_tax}
-    Rental: {net_rental}
-
-    Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. Advise how can the current tax liability can be reduced by giving examples.
-    Also at the end suggest to feel free to talk to DNA team and to get consultation ideas mentining our website DNAca.com.au and phone number 02-90644400.
-    
-    key note: put thi oone ...Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
-
-    Visit our website: dnaca.com.au Or call us on: 02-90644400 first and followed by the advice
-    """
-
-        response = model.generate_content(prompt)
-        advice_text = response.text
-
-    except:
-        advice_text = "AI advice unavailable. Please review manually."
-
-    content.append(Paragraph(advice_text, styles["Normal"]))
-
-    # -----------------------------
-    # DISCLAIMER
-    # -----------------------------
-    content.append(Spacer(1, 20))
-    content.append(Paragraph(
-        "Disclaimer: This report is generated for advisory purposes only. "
-        "Please consult a registered tax agent for final decisions.",
-        styles["Italic"]
-    ))
-
-    # BUILD PDF
-    doc.build(content)
-
-    return file_path
-st.header("📄 Export Report")
-
-if st.button("Generate PDF"):
-    pdf = generate_pdf()
-    with open(pdf, "rb") as f:
-        st.download_button("Download PDF", f, file_name="Tax_Report.pdf")
+# AI ADVICE
 # -----------------------------
-# FOOTER
+content.append(Paragraph("Professional Tax Advice", styles["Heading2"]))
+content.append(Spacer(1, 10))
+
+from reportlab.lib.styles import ParagraphStyle
+
+# Custom style for better readability
+ai_style = ParagraphStyle(
+    name="AIStyle",
+    parent=styles["Normal"],
+    fontSize=11,
+    leading=16,
+    spaceAfter=10,
+)
+
+def format_ai_text(text):
+    text = text.replace("\r", "")
+    paragraphs = text.split("\n\n")  # split by double line breaks
+    return [p.strip() for p in paragraphs if p.strip()]
+
+try:
+    prompt = f"""
+Client Income: {total_income}
+Taxable Income: {taxable_income}
+Net Tax: {net_tax}
+Rental: {net_rental}
+
+Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. 
+Advise how the current tax liability can be reduced with examples.
+
+At the end include:
+Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
+
+Visit our website: dnaca.com.au  
+Call us on: 02-90644400
+"""
+
+    response = model.generate_content(prompt)
+    advice_text = response.text
+
+    # 👉 FORMAT TEXT INTO PARAGRAPHS
+    formatted_paras = format_ai_text(advice_text)
+
+    for para in formatted_paras:
+        # Convert bullet points nicely
+        para = para.replace("•", "<br/>•")
+        para = para.replace("- ", "<br/>- ")
+
+        content.append(Paragraph(para, ai_style))
+        content.append(Spacer(1, 8))
+
+except Exception as e:
+    content.append(Paragraph("AI advice unavailable. Please review manually.", styles["Normal"]))
 # -----------------------------
 st.markdown("---")
 st.markdown("© 2026 DNA | AI Tax Solutions")
