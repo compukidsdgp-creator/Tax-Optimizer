@@ -417,7 +417,7 @@ def generate_pdf():
     content.append(Paragraph(f"Tax Payable: ${round(net_tax,2)}", styles["Normal"]))
     content.append(Spacer(1, 20))
 
-    # -----------------------------
+# -----------------------------
 # AI ADVICE
 # -----------------------------
 content.append(Paragraph("Professional Tax Advice", styles["Heading2"]))
@@ -439,30 +439,30 @@ def format_ai_text(text):
     paragraphs = text.split("\n\n")  # split by double line breaks
     return [p.strip() for p in paragraphs if p.strip()]
 
-try:
-    prompt = f"""
-Client Income: {total_income}
-Taxable Income: {taxable_income}
-Net Tax: {net_tax}
-Rental: {net_rental}
+   try:
+      prompt = f"""
+      Client Income: {total_income}
+      Taxable Income: {taxable_income}
+      Net Tax: {net_tax}
+      Rental: {net_rental}
 
-Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. 
-Advise how the current tax liability can be reduced with examples.
+      Suggest tax saving strategies in brief pointwise in simple understandable manner, so that clients can understand properly. 
+      Advise how the current tax liability can be reduced with examples.
 
-At the end include:
-Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
+      At the end include:
+      Please feel free to reach out to us for a personalised consultation to discuss your specific situation and get tailored advice.
 
-Visit our website: dnaca.com.au  
-Call us on: 02-90644400
-"""
+      Visit our website: dnaca.com.au  
+      Call us on: 02-90644400
+      """
 
-    response = model.generate_content(prompt)
-    advice_text = response.text
+     response = model.generate_content(prompt)
+     advice_text = response.text
 
-    # 👉 FORMAT TEXT INTO PARAGRAPHS
-    formatted_paras = format_ai_text(advice_text)
+     # 👉 FORMAT TEXT INTO PARAGRAPHS
+     formatted_paras = format_ai_text(advice_text)
 
-    for para in formatted_paras:
+     for para in formatted_paras:
         # Convert bullet points nicely
         para = para.replace("•", "<br/>•")
         para = para.replace("- ", "<br/>- ")
@@ -474,20 +474,20 @@ except Exception as e:
     content.append(Paragraph("AI advice unavailable. Please review manually.", styles["Normal"]))
 
 
-    # -----------------------------
-    # DISCLAIMER
-    # -----------------------------
-    content.append(Spacer(1, 20))
-    content.append(Paragraph(
+# -----------------------------
+# DISCLAIMER
+ # -----------------------------
+content.append(Spacer(1, 20))
+content.append(Paragraph(
         "Disclaimer: This report is generated for advisory purposes only. "
         "Please consult a registered tax agent for final decisions.",
         styles["Italic"]
-    ))
+))
 
-    # BUILD PDF
-    doc.build(content)
+ # BUILD PDF
+doc.build(content)
 
-    return file_path
+return file_path
 st.header("📄 Export Report")
 
 if st.button("Generate PDF"):
